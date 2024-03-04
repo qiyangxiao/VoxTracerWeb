@@ -1,5 +1,5 @@
 *.log
-static/compress
-static/downloads
-static/uploads
-test/
+#static/compress
+#static/downloads
+#static/uploads
+#test/

@@ -1,0 +1,5 @@
+*.log
+static/compress
+static/downloads
+static/uploads
+test/

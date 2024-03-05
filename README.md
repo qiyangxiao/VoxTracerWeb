@@ -23,7 +23,7 @@ flask db migrate -m "Initial Migration"
 flask db upgrade
 ```
 
-然后，你可以在终端使用如下命令操作数据库，具体的数据库配置可参考setting.py和models.py：
+然后，你可以在终端使用如下命令操作数据库，具体的数据库配置可参考settings.py和models.py：
 
 ```
 sqlite3 instance/voxtracer.db

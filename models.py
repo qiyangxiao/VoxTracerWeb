@@ -23,4 +23,4 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<User: %s %s %s %s>' % (self.uid, self.email, self.last_login)
+        return '<User: %s %s %s>' % (self.uid, self.email, self.last_login)

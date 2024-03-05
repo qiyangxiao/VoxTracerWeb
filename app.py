@@ -1,17 +1,20 @@
 from flask import Flask, render_template, request, jsonify, session, send_file, url_for
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
+from settings import Config
+from flask_migrate import Migrate
+from models import db
 import os
 import shutil
 import uuid
 
+# 创建Flask应用
 app = Flask(__name__)
-app.secret_key = "icckcfd20zzq523v4hawtdce76p2i7ar"
-app.config["ALLOWED_EXTENSIONS"] = {'mp3', 'wav', 'aac', 'flac', 'm4a'} # 被允许上传的文件扩展名
-app.config["UPLOAD_FOLDER"] = "audio/upload/" # 上传后的路径
-app.config["DOWNLOAD_FOLDER"] = "audio/converted/" # 转换后的路径
-app.config["COMPRESS_FOLDER"] = "audio/compressed/" # 压缩后的路径
-app.config["FILE_FOLDERS"] = [app.config["UPLOAD_FOLDER"], app.config["DOWNLOAD_FOLDER"], app.config["COMPRESS_FOLDER"]]
+# 加载配置信息
+app.config.from_object(Config)
+# 初始化数据库
+db.init_app(app)
+migrate = Migrate(app, db)
+
 
 # packaged functions
 
@@ -23,7 +26,6 @@ def upload_testing(filename:str):
     if ext not in app.config["ALLOWED_EXTENSIONS"]:
         return 0
     return ext
-
 
 # route functions
 
@@ -44,7 +46,6 @@ def upload():
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     upload_file.save(file_path)
     session['uploaded_filepath'] = file_path
-    #session['uploaded_file'] = upload_file
     info["message"] = f"文件上传成功！"
     return jsonify(info)
 
@@ -61,7 +62,6 @@ def download(filename:str, idx:str):
 @app.route('/convert')
 def convert():
     # 获取上传的文件，文件路径及其文件名
-    #uploaded_file = session.get('uploaded_file')
     uploaded_filepath = session.get('uploaded_filepath')
     uploaded_filename = os.path.basename(uploaded_filepath)
     info = {}

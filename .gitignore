@@ -1,3 +1,6 @@
 *.log
 audio/
 test/
+__pycache__/
+instance/
+migrations/

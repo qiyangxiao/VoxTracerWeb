@@ -16,8 +16,9 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-# packaged functions
-
+'''
+为方便编程而封装的函数
+'''
 # 检测音频文件是否符合规范
 def upload_testing(filename:str):
     if filename == '' or '.' not in filename:
@@ -27,12 +28,15 @@ def upload_testing(filename:str):
         return 0
     return ext
 
-# route functions
-
+'''
+网站路由逻辑函数
+'''
+# 根目录访问
 @app.route('/')
 def index():
     return render_template("index.html")
 
+# 上传音频处理
 @app.route('/upload', methods=['POST'])
 def upload():
     upload_file = request.files['audio_input']
@@ -49,16 +53,17 @@ def upload():
     info["message"] = f"文件上传成功！"
     return jsonify(info)
 
-# idx表示下载哪个路径下的文件
+# 下载音频处理
 @app.route('/download/<filename>/<idx>')
 def download(filename:str, idx:str):
     idx = int(idx)
-    file_path = os.path.join(app.config["FILE_FOLDERS"][idx], filename)
+    file_path = os.path.join(app.config["FILE_FOLDERS"][idx], filename) # idx表示下载哪个路径下的文件
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     else:
         return "File Not Found", 404
 
+# 音频转换处理
 @app.route('/convert')
 def convert():
     # 获取上传的文件，文件路径及其文件名
@@ -82,6 +87,7 @@ def convert():
         info["message"] = "出了点问题，请重新上传！"
     return jsonify(info)
 
+# 模拟压缩处理
 @app.route('/compress')
 def compress():
     converted_filepath = session.get('converted_filepath')
@@ -104,6 +110,7 @@ def compress():
         info["message"] = "压缩出了点问题，请重试！"
     return jsonify(info)
 
+# 说话人身份验证处理
 @app.route('/identify')
 def identify():
     compressed_filepath = session.get('compressed_filepath')

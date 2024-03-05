@@ -8,9 +8,9 @@ import uuid
 app = Flask(__name__)
 app.secret_key = "icckcfd20zzq523v4hawtdce76p2i7ar"
 app.config["ALLOWED_EXTENSIONS"] = {'mp3', 'wav', 'aac', 'flac', 'm4a'} # 被允许上传的文件扩展名
-app.config["UPLOAD_FOLDER"] = "static/uploads/" # 上传路径
-app.config["DOWNLOAD_FOLDER"] = "static/downloads" # 下载路径
-app.config["COMPRESS_FOLDER"] = "static/compress" # 压缩路径
+app.config["UPLOAD_FOLDER"] = "audio/upload/" # 上传后的路径
+app.config["DOWNLOAD_FOLDER"] = "audio/converted/" # 转换后的路径
+app.config["COMPRESS_FOLDER"] = "audio/compressed/" # 压缩后的路径
 app.config["FILE_FOLDERS"] = [app.config["UPLOAD_FOLDER"], app.config["DOWNLOAD_FOLDER"], app.config["COMPRESS_FOLDER"]]
 
 # packaged functions
@@ -48,6 +48,7 @@ def upload():
     info["message"] = f"文件上传成功！"
     return jsonify(info)
 
+# idx表示下载哪个路径下的文件
 @app.route('/download/<filename>/<idx>')
 def download(filename:str, idx:str):
     idx = int(idx)
@@ -67,7 +68,7 @@ def convert():
     if uploaded_filename:
         # voice convert操作...
 
-        # 构造新的文件名：原文件名_converted
+        # 构造新的文件名：原文件名_conv
         split_name = uploaded_filename.rsplit('.', 1)
         converted_filename = split_name[0] + "_conv" + "." + split_name[1].lower()
 
@@ -89,7 +90,7 @@ def compress():
     if converted_filename:
         # 音频压缩操作...
 
-        # 构造新的文件名：原文件名_compressed
+        # 构造新的文件名：原文件名_comp
         split_name = converted_filename.rsplit('.', 1)
         compressed_filename = split_name[0] + "_comp" + "." + split_name[1].lower()
 

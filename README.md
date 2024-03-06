@@ -13,7 +13,7 @@ cd VoxTracerWeb
 python app.py
 ```
 
-本项目使用Python自带的数据库sqlite，初始化你的数据库请在终端输入以下命令：
+推荐使用Python自带的数据库sqlite，初始化数据库请在终端输入以下命令：
 
 ```
 set FLASK_APP=app.py //Windows平台下
@@ -23,7 +23,7 @@ flask db migrate -m "Initial Migration"
 flask db upgrade
 ```
 
-然后，你可以在终端使用如下命令操作数据库，具体的数据库配置可参考settings.py和models.py：
+具体的数据库配置可在settings.py和models.py修改。然后，你可以在终端使用如下命令操作数据库：
 
 ```
 sqlite3 instance/voxtracer.db

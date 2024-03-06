@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxTracerWeb</title>
+    <!--静态文件加载-->
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <link rel="icon", href="{{ url_for('static', filename='icon.svg') }}" type="image/svg">
+</head>
+<body>
+    <h1>You can register here</h1>
+    <!--注册表单-->
+    <form id="register-form">
+        <label for="email">邮箱：</label>
+        <input type="text" id="email" name="email" required>
+        <button type="button" id="email-button">发送验证码</button><br>
+
+        <label for="password">创建密码：</label>
+        <input type="password" id="password" name="pwd" required><br>
+
+        <label for="re-password">确认密码：</label>
+        <input type="password" id="re-password" name="rpwd" required><br>
+
+        <div id="verification" style="display: none;">
+            <label for="vrfcode">验证码：</label>
+            <input type="text" id="vrfcode" name="vrfcode" required>
+        </div>
+
+        <button type="button" id="register-button" disabled>注册</button>
+    </form>
+    <div id="message"></div>
+    <script>
+        // 正则表达式检测邮箱合法性
+        function IsVaildEmail(email) {
+            var regex = /^[a-zA-Z0-9_\-]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,6}$/
+            return regex.test(email);
+        }   
+
+        function ShowAnchor(element) {
+            document.getElementById(element).style.display = 'block';
+        }
+        function ShowInfo(response) {
+            document.getElementById('message').innerText = response.message;
+        };
+
+        $(document).ready(function() {
+            $('#email-button').on('click', function(event) {
+                email_addr = $('#email').val();
+                if (IsVaildEmail(email_addr)) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/sendcode',
+                        data: JSON.stringify({email : email_addr}),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            ShowAnchor('verification');
+                            $('#email-button').prop('disabled', true); // 禁用'发送验证码'按钮
+                            $('#register-button').prop('disabled', false); // 启用'注册'按钮
+                            alert(response.message);
+                        },
+                        error: function(response) {
+                            alert(response.message);
+                        }
+                    });
+                }
+                else {
+                    alert('请输入有效的邮箱地址！');
+                }
+            });
+
+            $('#register-button').on('click', function(event){
+                var RegisterFormData = new FormData($('#register-form')[0]);
+                // 在提交注册表单前，对信息的必要输入验证尚未添加
+                $.ajax({
+                    type: 'POST',
+                    url: '/register',
+                    data: RegisterFormData,
+                    contentType: false,
+                    processData: false,
+                    success: function(respnose) {
+                        ShowInfo(respnose);
+                    },
+                    error: function(respnose) {
+                        ShowInfo(respnose);
+                    }
+                });
+            }); 
+        });
+    </script>
+</body>
+</html>

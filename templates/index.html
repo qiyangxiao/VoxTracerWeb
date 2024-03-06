@@ -4,16 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoxTracerWeb</title>
-    <!--静态JS文件加载-->
+    <!--静态文件加载-->
     <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
     <link rel="icon", href="{{ url_for('static', filename='icon.svg') }}" type="image/svg">
 </head>
 <body>
     <h1>Welcome to VoxTracer!</h1>
+    {% if uid %}
+        <h2>欢迎你，用户{{ uid }}！</h2>
+    {% else %}
+        <h2>您暂未登录</h2>
+        <a href="login.html">点击登录</a>
+        <a href="register.html">点击注册</a>
+    {% endif %}
+    
     <!--音频上传-->
-    <form id="upload_form" enctype="multipart/form-data">
+    <form id="upload-form" enctype="multipart/form-data">
         <input type="file" name="audio_input">
-        <button type="button" id="upload_button">点击上传音频</button>
+        <button type="button" id="upload-button">点击上传音频</button>
     </form>
 
     <!--音频转换-->
@@ -26,12 +34,16 @@
     <button type="button" id="identify-button" style="display: none;">点击溯源身份</button>
 
     <div id="message"></div>
+    <div id="tracing-result"></div>
     <a id="download-link" target="_blank" style="display: none;">若没有自动下载，请点击此处以手动下载处理后的音频</a>
     <p>More contents remain to be added...</p>
 
     <script>
         function ShowInfo(response) {
             document.getElementById('message').innerText = response.message;
+            if (response.speaker_id) {
+                document.getElementById('tracing-result').innerText = response.speaker_id;
+            }
         };
 
         function ShowAnchor(element) {
@@ -48,8 +60,8 @@
 
         // ajax异步处理表单
         $(document).ready(function() {
-            $('#upload_button').on('click', function(event) {
-                var UploadFormData = new FormData($('#upload_form')[0]);
+            $('#upload-button').on('click', function(event) {
+                var UploadFormData = new FormData($('#upload-form')[0]);
                 $.ajax({
                     type: 'POST',
                     url: '/upload',

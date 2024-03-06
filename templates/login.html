@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxTracerWeb</title>
+    <!--静态文件加载-->
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <link rel="icon", href="{{ url_for('static', filename='icon.svg') }}" type="image/svg">
+</head>
+<body>
+    <h1>You can log in here</h1>
+    <!--登录表单-->
+    <form id="login-form">
+        <label for="user_id">用户ID：</label>
+        <input type="text" id="user_id" name="uid" required><br>
+
+        <label for="password">密码：</label>
+        <input type="password" id="password" name="pwd" required><br>
+
+        <button type="button" id="login-button">登录</button>
+    </form>
+
+    <div id="message"></div>
+    <script>
+        function ShowInfo(response) {
+            document.getElementById('message').innerText = response.message;
+        };
+
+        $(document).ready(function() {
+            $('#login-button').on('click', function(event) {
+                var LoginFormData = new FormData($('#login-form')[0]);
+                // 在提交登录表单前，必要的输入验证尚未添加
+                $.ajax({
+                    type: 'POST',
+                    url: '/login',
+                    data: LoginFormData,
+                    contentType: false,
+                    processData: false,
+                    success: function(respnose) {
+                        ShowInfo(respnose);
+                    },
+                    error: function(respnose) {
+                        ShowInfo(respnose);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

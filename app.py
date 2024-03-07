@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 from models import User, db
 from settings import Config
-from utils import generate_string, send_email, upload_testing
+from utils import generate_string, send_email, upload_testing, check_expire
 
 # 创建Flask应用
 app = Flask(__name__)
@@ -134,7 +134,8 @@ def login():
     info = {}
     if user and user.pwd == pwd:
         session['uid'] = uid
-        return redirect(url_for('index'))
+        info['message'] = '登录成功，将在3s后跳转...'
+        return jsonify(info)
     else:
         info['message'] = '用户名或密码有误！'
         return jsonify(info)
@@ -148,6 +149,7 @@ def register():
     vrfcode = request.form['vrfcode']
 
     my_vrfcode = session.get('vrfcode')
+    send_time = session.get('send_time')
     info = {}
     # 检查是否是已经存在的用户
     existing_user = User.query.filter_by(email=email).first()
@@ -158,6 +160,9 @@ def register():
     # 检查验证码（邮箱是否真实存在）
     if vrfcode != my_vrfcode:
         info['message'] = '验证码错误！'
+        return jsonify(info)
+    elif not check_expire(send_time, 300):
+        info['message'] = '验证码过期，请重新发送！'
         return jsonify(info)
     else:
         uid = generate_string(6) # 生成uid
@@ -174,9 +179,10 @@ def register():
 def sendcode():
     info = {}
     receiver_email = request.get_json()['email']
-    vrfcode = send_email(receiver_email)
+    vrfcode, send_time = send_email(receiver_email)
     if vrfcode:
         session['vrfcode'] = vrfcode
+        session['send_time'] = send_time
         info['message'] = '验证码发送成功，请查看收件箱或检查垃圾邮箱！'
     else:
         info['message'] = '出了点问题，请重试！'

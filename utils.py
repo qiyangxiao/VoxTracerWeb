@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formataddr
+from datetime import datetime, timedelta
 from settings import Config
 import random
 import string
@@ -52,6 +53,13 @@ def send_email(receiver:str):
         server.login(config.SERVER_EMAIL_ADDRESS, config.SERVER_EMAIL_PASSWORD)
         server.sendmail(config.SERVER_EMAIL_ADDRESS, [receiver], msg.as_string())
         server.quit()
-        return vrfcode
+        send_time = datetime.now()
+        return vrfcode, send_time
     except Exception:
         return 0
+    
+# 检查验证码有效时间
+def check_expire(send_time:str, limit:int):
+    if datetime.now() - send_time.replace(tzinfo=None) <= timedelta(seconds=limit):
+        return 1
+    return 0

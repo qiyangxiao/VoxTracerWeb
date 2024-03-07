@@ -27,6 +27,10 @@
             document.getElementById('message').innerText = response.message;
         };
 
+        function RedirectToIndex() {
+            window.location.replace('/');
+        }
+
         $(document).ready(function() {
             $('#login-button').on('click', function(event) {
                 var LoginFormData = new FormData($('#login-form')[0]);
@@ -39,6 +43,7 @@
                     processData: false,
                     success: function(respnose) {
                         ShowInfo(respnose);
+                        setTimeout(RedirectToIndex, 3000); // 3000ms
                     },
                     error: function(respnose) {
                         ShowInfo(respnose);

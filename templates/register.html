@@ -30,6 +30,7 @@
         <button type="button" id="register-button" disabled>注册</button>
     </form>
     <div id="message"></div>
+    <button type="button" id="tologin-button" style="display: none;">点击此处跳转登录界面</button>
     <script>
         // 正则表达式检测邮箱合法性
         function IsVaildEmail(email) {
@@ -80,12 +81,17 @@
                     processData: false,
                     success: function(respnose) {
                         ShowInfo(respnose);
+                        ShowAnchor('tologin-button');
                     },
                     error: function(respnose) {
                         ShowInfo(respnose);
                     }
                 });
-            }); 
+            });
+        });
+
+        document.getElementById("tologin-button").addEventListener("click", function() {
+            window.location.replace('/login.html');
         });
     </script>
 </body>

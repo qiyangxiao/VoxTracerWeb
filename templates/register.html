@@ -45,6 +45,24 @@
             document.getElementById('message').innerText = response.message;
         };
 
+        // 计时器函数，用来禁用和启用验证码功能
+        function CountDown() {
+            $('#email-button').prop('disabled', true);
+            $('#register-button').prop('disabled', false);
+            let secs = 30;
+            let countdown = $('<span>').text(`（${secs}秒后可重新发送）`);
+            $('#email-button').append(countdown);
+            let intervalID = setInterval(() => {
+                secs--;
+                countdown.text(`（${secs}秒后可重新发送）`);
+                if (secs <= 0) {
+                    clearInterval(intervalID);
+                    countdown.remove();
+                    $('#email-button').prop('disabled', false);
+                }
+            }, 1000);
+        }
+
         $(document).ready(function() {
             $('#email-button').on('click', function(event) {
                 email_addr = $('#email').val();
@@ -56,8 +74,7 @@
                         contentType: 'application/json',
                         success: function(response) {
                             ShowAnchor('verification');
-                            $('#email-button').prop('disabled', true); // 禁用'发送验证码'按钮
-                            $('#register-button').prop('disabled', false); // 启用'注册'按钮
+                            CountDown();
                             alert(response.message);
                         },
                         error: function(response) {

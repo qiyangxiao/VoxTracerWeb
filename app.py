@@ -44,10 +44,18 @@ def loadmanifest(filename:str):
 # 上传音频处理
 @app.route('/upload', methods=['POST'])
 def upload():
-    upload_file = request.files['audio_input']
     info = {}
+    # 验证用户是否登录
+    uid = session.get('uid')
+    if not uid:
+        info['ok'] = 0
+        info['message'] = '你必须先登录账号！'
+        return jsonify(info)
+    
+    upload_file = request.files['audio_input']
     ext = upload_testing(secure_filename(upload_file.filename))
     if ext == 0:
+        info['ok'] = 0
         info['message'] = '文件上传失败！'
         return jsonify(info)
     # 重命名文件
@@ -55,6 +63,7 @@ def upload():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     upload_file.save(file_path)
     session['uploaded_filepath'] = file_path
+    info['ok'] = 1
     info['message'] = f'文件上传成功！'
     return jsonify(info)
 

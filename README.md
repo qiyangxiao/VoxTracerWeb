@@ -1,6 +1,6 @@
 # VoxTracerWeb
 
-本项目是基于VoxTracer(ACM MM 2023)实现的应用网页系统。主要包括音频变声转换，音频传输压缩和说话人溯源3大功能。VoxTracer项目官方代码可访问[https://github.com/hongchengzhu/VoxTracer](https://github.com/hongchengzhu/VoxTracer)查看。
+本项目是基于 VoxTracer(ACM MM 2023) 实现的应用网页系统。主要包括音频变声转换，音频传输压缩和说话人溯源 3 大功能。 VoxTracer 项目官方代码可访问[https://github.com/hongchengzhu/VoxTracer](https://github.com/hongchengzhu/VoxTracer)查看。
 
 ## 使用教程
 
@@ -21,7 +21,7 @@ python app.py
 
 ### Flask 部分说明
 
-+ 后端使用的是Python自带的轻量级数据库sqlite3，数据库的初始化会在`python app.py`执行。具体的数据库配置可在config.py和models.py修改。然后，你可以在终端使用如下命令操作数据库：
++ 后端使用的是 Python 自带的轻量级数据库 sqlite3 ，数据库的初始化会在`python app.py`执行。具体的数据库配置可在 config.py 和 models.py 修改。然后，你可以在终端使用如下命令操作数据库：
 
 ```
 sqlite3 instance/voxtracer.db

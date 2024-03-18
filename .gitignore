@@ -4,3 +4,4 @@ test/
 __pycache__/
 instance/
 migrations/
+frontend/

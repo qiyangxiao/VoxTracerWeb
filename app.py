@@ -1,14 +1,18 @@
-import hashlib
 import os
 import shutil
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
+from flask import Flask
+from flask import jsonify
+from flask import render_template, request
+from flask import send_from_directory, send_file, session
+from flask import url_for
+
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 
 from models import User, db
-from settings import Config
-from utils import generate_string, send_email, upload_testing, check_expire
+from config import Config
+from utils import *
 
 # 创建Flask应用
 app = Flask(__name__)
@@ -20,14 +24,22 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 
+
 '''
 网站路由逻辑函数
 '''
 # 根目录访问
 @app.route('/')
 def index():
-    uid = session.get('uid')
-    return render_template('index.html', uid=uid)
+    return render_template('index.html')
+
+# 加载静态文件
+@app.route('/loadmanifest/<filename>')
+def loadmanifest(filename:str):
+    if filename in app.config['ALLOWED_STATICFILES']:
+        return send_from_directory(app.static_folder, filename)
+    else:
+        return 'File Not Found', 404
 
 # 上传音频处理
 @app.route('/upload', methods=['POST'])
@@ -39,7 +51,7 @@ def upload():
         info['message'] = '文件上传失败！'
         return jsonify(info)
     # 重命名文件
-    filename = f'{generate_string(8)}.{ext}'
+    filename = f'{generate_abstring(8)}.{ext}'
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     upload_file.save(file_path)
     session['uploaded_filepath'] = file_path
@@ -113,80 +125,114 @@ def identify():
     return jsonify(info)
 
 # 加载登录页面
-@app.route('/login.html')
+@app.route('/onlogin')
 def login_html():
-    return render_template('login.html')
+    return render_template('index.html')
 
 # 加载注册页面
-@app.route('/register.html')
+@app.route('/onregister')
 def register_html():
-    return render_template('register.html')
+    return render_template('index.html')
 
 # 登录信息验证
-@app.route('/login', methods=['POST'])
+@app.route('/handlelogin', methods=['POST'])
 def login():
     # 获取用户名和密码
-    uid = request.form['uid']
-    pwd = hashlib.sha256(request.form['pwd'].encode('utf-8')).hexdigest() #sha256
-
+    uid = request.form['uid'] 
+    pwd = sha256str(request.form['pwd'])
+    
     # 查询数据库
-    user = User.query.filter_by(uid=uid).first()
+    user = User.query.filter((User.uid==uid) | (User.email==uid)).first()
     info = {}
     if user and user.pwd == pwd:
         session['uid'] = uid
         info['message'] = '登录成功，将在3s后跳转...'
-        return jsonify(info)
+        info['ok'] = 1
     else:
         info['message'] = '用户名或密码有误！'
-        return jsonify(info)
+        info['ok'] = 0
+    
+    return jsonify(info)
 
 # 注册信息验证
-@app.route('/register', methods=['POST'])
+@app.route('/handleregister', methods=['POST'])
 def register():
     # 获取注册表单信息
     email = request.form['email']
-    pwd = hashlib.sha256(request.form['pwd'].encode('utf-8')).hexdigest()
-    vrfcode = request.form['vrfcode']
+    pwd = sha256str(request.form['pwd'])
+    captcha = request.form['captcha']
 
-    my_vrfcode = session.get('vrfcode')
+    my_captcha = session.get('captcha')
     send_time = session.get('send_time')
     info = {}
     # 检查是否是已经存在的用户
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         info['message'] = '该邮箱已经被注册过了！'
+        info['ok'] = 0
         return jsonify(info)
 
     # 检查验证码（邮箱是否真实存在）
-    if vrfcode != my_vrfcode:
+    if captcha != my_captcha:
         info['message'] = '验证码错误！'
-        return jsonify(info)
+        info['ok'] = 0
     elif not check_expire(send_time, 300):
         info['message'] = '验证码过期，请重新发送！'
-        return jsonify(info)
+        info['ok'] = 0
     else:
-        uid = generate_string(6) # 生成uid
+        uid = generate_abstring(8) # 生成uid
         # 向数据库添加一条user记录
         new_user = User(uid=uid, pwd=pwd, email=email)
         db.session.add(new_user)
         db.session.commit()
         
         info['message'] = f'注册成功，你的uid为{uid}，请牢记！'
-        return jsonify(info)
+        info['ok'] = 1
+
+    return jsonify(info)
 
 # 邮箱验证码发送
 @app.route('/sendcode', methods=['POST'])
 def sendcode():
     info = {}
     receiver_email = request.get_json()['email']
-    vrfcode, send_time = send_email(receiver_email)
-    if vrfcode:
-        session['vrfcode'] = vrfcode
+    print(receiver_email)
+    captcha, send_time = send_email(receiver_email)
+    if captcha:
+        session['captcha'] = captcha
         session['send_time'] = send_time
         info['message'] = '验证码发送成功，请查看收件箱或检查垃圾邮箱！'
+        info['ok'] = 1
     else:
         info['message'] = '出了点问题，请重试！'
+        info['ok'] = 0
+        
+    return jsonify(info)
+
+@app.route('/checkloggedin', methods=['POST'])
+def checkloggedin():
+    uid = session.get('uid')
+    user = User.query.filter((User.uid==uid) | (User.email==uid)).first()
+    info = {}
+    if uid:
+        info['ok'] = 1
+        info['uid'] = user.uid
+    else:
+        info['ok'] = 0
+    return jsonify(info)
+
+@app.route('/handlelogout', methods=['POST'])
+def handlelogout():
+    uid = session.pop('uid', None)
+    info = {}
+    if uid:
+        info['ok'] = 1
+        info['message'] = '你已成功登出！'
+    else:
+        info['ok'] = 0
+        info['message'] = '你尚未登录！'
+        
     return jsonify(info)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('127.0.0.1', port=5000, debug=True)

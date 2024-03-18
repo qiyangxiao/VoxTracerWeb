@@ -1,6 +1,7 @@
 class Config:
     SECRET_KEY = 'icckcfd20zzq523v4hawtdce76p2i7ar' # session秘钥
     ALLOWED_EXTENSIONS = {'mp3', 'wav', 'aac', 'flac', 'm4a'}
+    ALLOWED_STATICFILES = {'favicon.ico', 'manifest.json', 'logo192.png', 'logo512.png'}
     UPLOAD_FOLDER = 'audio/upload/'
     DOWNLOAD_FOLDER = 'audio/converted/'
     COMPRESS_FOLDER = 'audio/compressed/'

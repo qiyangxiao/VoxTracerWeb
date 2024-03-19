@@ -169,7 +169,7 @@ def register():
     # 获取注册表单信息
     email = request.form['email']
     pwd = sha256str(request.form['pwd'])
-    captcha = request.form['captcha']
+    captcha = request.form['captcha'].upper()
 
     my_captcha = session.get('captcha')
     send_time = session.get('send_time')

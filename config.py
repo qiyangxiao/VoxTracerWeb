@@ -8,5 +8,5 @@ class Config:
     FILE_FOLDERS = [UPLOAD_FOLDER, DOWNLOAD_FOLDER, COMPRESS_FOLDER]
     SQLALCHEMY_DATABASE_URI = 'sqlite:///voxtracer.db' # sqlite中instance目录为默认根目录
     SQLALCHEMY_TRACK_MODIFICATIONS = False # 禁用数据库模型修改监控
-    SERVER_EMAIL_ADDRESS = 'qyangshaw@163.com' # 服务器邮箱
-    SERVER_EMAIL_PASSWORD = 'TCVXMFNBKVDKBXTM' # 服务器STMP授权码
+    SERVER_EMAIL_ADDRESS = 'your server email address' # 服务器邮箱
+    SERVER_EMAIL_PASSWORD = 'your authentication code' # 服务器STMP授权码
